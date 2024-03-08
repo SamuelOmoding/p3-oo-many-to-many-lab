@@ -1,10 +1,67 @@
 class Author:
-    pass
+    def __init__(self, name):
+        self.name = name
 
+    def contracts(self):
+        return [contract for contract in Contract.all if contract.author == self]
+
+    def books(self):
+        return [contract.book for contract in self.contracts()]
+
+    def sign_contract(self, book, date, royalties):
+        contract = Contract(self, book, date, royalties)
+        return contract
+
+    def total_royalties(self):
+        return sum(contract.royalties for contract in self.contracts())
+    pass
 
 class Book:
-    pass
+    def __init__(self, title):
+        self.title = title
 
+    def contracts(self):
+        return [contract for contract in Contract.all if contract.book == self]
+
+    def authors(self):
+        return [contract.author for contract in self.contracts()]
+    pass  
 
 class Contract:
+    all = []
+
+    def __init__(self, author, book, date, royalties):
+        if not isinstance(author, Author):
+            raise TypeError("Author must be an instance of Author class")
+        if not isinstance(book, Book):
+            raise TypeError("Book must be an instance of Book class")
+        if not isinstance(date, str):
+            raise TypeError("Date must be a string")
+        if not isinstance(royalties, int):
+            raise TypeError("Royalties must be an integer")
+
+        self.author = author
+        self.book = book
+        self.date = date
+        self.royalties = royalties
+        Contract.all.append(self)
+
+    @classmethod
+    def contracts_by_date(cls, date):
+        return sorted(cls.all_contracts, key=lambda contract: contract.date)
     pass
+ 
+if __name__ == "__main__":
+    book1 = Book("Book 1")
+    book2 = Book("Book 2")
+    author = Author("John Doe")
+
+    contract1 = author.sign_contract(book1, "2024-03-07", 10)
+    contract2 = author.sign_contract(book2, "2024-03-08", 15)
+    
+    print("Contracts by date:")
+    for contract in Contract.contracts_by_date("2024-03-07"):
+        print(contract.book.title, contract.date)
+
+    print("Total royalties for author:", author.total_royalties())
+
